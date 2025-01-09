@@ -1,0 +1,80 @@
+library(dplR)
+library(dendroTools)
+library (reshape2)
+
+
+##reading rwl data and creating TRW chronologies for south "BLJ" and north "BSF"##
+blj<- read.rwl ("bljf.rwl")
+blj1<- detrend(blj, method = "Spline", nyrs = 40)
+bljchr<-chron(blj1, prewhitten = TRUE, biweight = T)
+View(bljchr)
+bljchr$year<- as.numeric(row.names(bljchr))
+bljchra<- subset (bljchr, year >1960)
+bljf<- bljchra [ ,1]
+bljf1<- as.data.frame (bljf)
+
+bls<- read.rwl ("bsf.rwl")
+bls1<- detrend(bls, method = "Spline", nyrs = 40)
+blschr<-chron(bls1, prewhitten = TRUE, biweight = T)
+blschr$year<- as.numeric(row.names(blschr))
+blschra<- subset (blschr, year >1960)
+blsf<- blschra [ ,1]
+blsf1<- as.data.frame (blsf)
+
+##uploading temperature and precipitation data##
+
+precbl <- read.csv("D:/data/precbl.csv")
+tempbl <- read.csv("D:/data/tempbl.csv")
+
+
+##detrending temperature data##
+doyframe<- data.frame (DoY = c(1:365))
+yearframe<- data.frame (year = c(1961:2019))
+
+
+for (i in c(1:nrow(doyframe))) {
+
+bltable<- tempbl %>% filter(DOY == doyframe$DoY[i])
+bltable2<- data.frame (Temp = bltable$temp)
+yearframe<- cbind (yearframe,bltable2)
+
+rm(bltable, bltable2)
+}
+
+
+colnames(yearframe) <- c("year", names1)
+rnames<- yearframe$year
+yearframed<- yearframe [ ,-1]
+row.names(yearframed) = rnames
+yearframedd<- as.rwl(yearframed)
+min(yearframedd)
+yearframedd<- yearframedd + 30
+yearframeddd<- detrend(yearframedd, method = "Spline", nyrs = 40, difference = TRUE)
+yearframeddd$year<- rnames
+yearfr1<- transform(yearfr, doy1 = substr(variable,2,nchar(yearfr)-1))
+yearfr1$DOY<- as.numeric (yearfr1$doy1)
+yearfr1<- yearfr1 [, -c(2.4)]
+yearfr1<- yearfr1 [, -3]
+colnames(yearfr1) = c("Year","temp","DOY")
+yearfr2<-  yearfr1[ order( yearfr1 [,1], yearfr1 [,3]),]
+tempdetrend<- subset (yearfr2, Year<2014)
+tempdetrend <- tempdetrend[, c(1, 3, 2)]
+
+##calculation and plotting daily correlations##
+COR_PN <- daily_response(blsf1, env_data = precblf, tidy_env_data = T, method = "cor", alpha = 0.05, aggregate_function = "mean", reference_window = "middle", remove_insignificant = T, lower_limit = 10, upper_limit = 30)
+COR_PS <- daily_response(bljf1, env_data = precblf, tidy_env_data = T, method = "cor", alpha = 0.05, aggregate_function = "mean", reference_window = "middle", remove_insignificant = T, lower_limit = 10, upper_limit = 30)
+COR_TN <- daily_response(blsf1, env_data = tempdetrend, tidy_env_data = T, method = "cor", alpha = 0.05, aggregate_function = "mean", reference_window = "middle", remove_insignificant = T, lower_limit = 10, upper_limit = 30)
+COR_TS <- daily_response(bljf1, env_data = tempdetrend, tidy_env_data = T, method = "cor", alpha = 0.05, aggregate_function = "mean", reference_window = "middle", remove_insignificant = T, lower_limit = 10, upper_limit = 30)
+
+COR_P_N<- melt(COR_PN$calculations)
+COR_P_S<- melt(COR_PS$calculations)
+COR_T_N<- melt(COR_TN$calculations)
+COR_T_S<- melt(COR_TS$calculations)
+
+COR_T_S$cat<-"Temperature - south"
+COR_T_N$cat<-"Temperature - north"
+COR_P_N$cat<-"Precipitation - north"
+COR_P_S$cat<-"Precipitation - south"
+
+alltable<- rbind(COR_T_S, COR_T_N, COR_P_N, COR_P_S)
+ggplot(alltable, aes (Var2,Var1)) + geom_raster(aes(fill = value)) + scale_fill_gradientn(colours= c("blue","green", "red"), na.value = "white") + ggtitle("") +    xlab("DOY") +  ylab("Interval (days)") + theme_bw() + theme(axis.text = element_text(size = 16)) + theme(axis.title = element_text(size = 16)) + facet_wrap(~cat, ncol = 2)+ theme(strip.text = element_text(size = 16))

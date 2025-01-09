@@ -1,0 +1,343 @@
+library (dplyr)
+library (CAVIAR)
+
+
+##reading xylo database, creating subsets for sites and years##
+blabxylf2 <- read.csv("C:/data/blabxylf2.csv", sep=";")
+
+bls2012<- subset (blabxylf2, Year == 2012 & Site == "south")
+bln2012<- subset (blabxylf2, Year == 2012 & Site == "north")
+bls2013<- subset (blabxylf2, Year == 2013 & Site == "south")
+bln2013<- subset (blabxylf2, Year == 2013 & Site == "north")
+bls2014<- subset (blabxylf2, Year == 2014 & Site == "south")
+bln2014<- subset (blabxylf2, Year == 2014 & Site == "north")
+
+##BL south 2012##
+
+##fitting Gompertz function##
+
+bl.mean <- aggregateRadialFiles(data=bls2012, stat="mean")
+bl.sdd <- standardiseCellCounts(bl.mean)
+bl.sdd_RCN <- computeRingCellNb(bl.sdd)[, c("Site", "Year", "Tree", "Species", "RCN.Median")]
+names(bl.sdd_RCN) <- c("Site", "Year", "Tree", "Species", "A")
+bl.sdd_GZP.fix <- fitGompertzModels(bl.sdd, parameters=bl.sdd_RCN, predictions=TRUE,
+plot.fitting=FALSE, plot.obs.vs.pre=FALSE)
+
+
+
+
+##storing critical dates of wood formation and simnulated Gompertz curves##
+
+
+treenames2012<- c("T1", "T2", "T3", "T4", "T5", "T6")
+treenames2013.2014<- c("T1", "T2", "T3", "T4", "T5", "T6","T7", "T8")
+
+##data.frames for data storage##
+treeparamBLS2012<- data.frame (Type = NA,a=NA,b=NA,k=NA,ti=NA,tf=NA,dt=NA,tx=NA,ra=NA,rx=NA,R2=NA,EF=NA,RMSD=NA, treecode = NA, year = NA, site = NA, treenr = NA)
+treetabBLS2012<- data.frame (Type = NA,a=NA,b=NA,k=NA,ti=NA,tf=NA,dt=NA,tx=NA,ra=NA,rx=NA,R2=NA,EF=NA,RMSD=NA, treecode = treenames2012, year = 2012, site = "south", treenr = c(1:6))
+simulationsBLS2012<- data.frame (DY = c(1:365), NRcells=NA)
+
+
+
+
+
+##critical dates storage##
+
+for (i in c(1:nrow(treetabBLS2012))) {
+treex<- bl.sdd_GZP.fix[treetabBLS2012$treenr [i]]
+vun2<- treex[[1]]$coefficients
+vun2$site<- treetabBLS2012$site [i]
+vun2$year<- treetabBLS2012$year [i]
+vun2$treecode<- treetabBLS2012$treecode [i]
+vun2$treenr<- treetabBLS2012$treenr [i]
+treeparamBLS2012<- rbind (treeparamBLS2012, vun2)
+rm(treex,vun2)
+}
+
+
+##Gompertz fits predictions##
+
+
+for (i in c(1:nrow(treetabBLS2012))) {
+    treex<- bl.sdd_GZP.fix[treetabBLS2012$treenr [i]]
+    vug<- data.frame(NRcells = treex[[1]]$simulations$EWMZ)
+    treename<- treetabBLS2012$treecode [i]
+    colnames (vug) [1]<- treename
+    simulationsBLS2012<- cbind (simulationsBLS2012, vug)
+    rm(treex,vug)
+}
+
+##BL north 2012##
+##fitting Gompertz function##
+
+bl.mean <- aggregateRadialFiles(data=bln2012, stat="mean")
+bl.sdd <- standardiseCellCounts(bl.mean)
+bl.sdd_RCN <- computeRingCellNb(bl.sdd)[, c("Site", "Year", "Tree", "Species", "RCN.Median")]
+names(bl.sdd_RCN) <- c("Site", "Year", "Tree", "Species", "A")
+bl.sdd_GZP.fix <- fitGompertzModels(bl.sdd, parameters=bl.sdd_RCN, predictions=TRUE,
+plot.fitting=FALSE, plot.obs.vs.pre=FALSE)
+
+
+
+
+##storing critical dates of wood formation and simnulated Gompertz curves##
+
+
+treenames2012<- c("T1", "T2", "T3", "T4", "T5", "T6")
+treenames2013.2014<- c("T1", "T2", "T3", "T4", "T5", "T6","T7", "T8")
+
+##data.frames for data storage##
+treeparamBLN2012<- data.frame (Type = NA,a=NA,b=NA,k=NA,ti=NA,tf=NA,dt=NA,tx=NA,ra=NA,rx=NA,R2=NA,EF=NA,RMSD=NA, treecode = NA, year = NA, site = NA, treenr = NA)
+treetabBLN2012<- data.frame (Type = NA,a=NA,b=NA,k=NA,ti=NA,tf=NA,dt=NA,tx=NA,ra=NA,rx=NA,R2=NA,EF=NA,RMSD=NA, treecode = treenames2012, year = 2012, site = "north", treenr = c(1:6))
+simulationsBLN2012<- data.frame (DY = c(1:365), NRcells=NA)
+
+
+
+
+
+##critical dates storage##
+
+for (i in c(1:nrow(treetabBLN2012))) {
+treex<- bl.sdd_GZP.fix[treetabBLN2012$treenr [i]]
+vun2<- treex[[1]]$coefficients
+vun2$site<- treetabBLN2012$site [i]
+vun2$year<- treetabBLN2012$year [i]
+vun2$treecode<- treetabBLN2012$treecode [i]
+vun2$treenr<- treetabBLN2012$treenr [i]
+treeparamBLN2012<- rbind (treeparamBLN2012, vun2)
+rm(treex,vun2)
+}
+
+
+##Gompertz fits predictions##
+
+
+for (i in c(1:nrow(treetabBLN2012))) {
+    treex<- bl.sdd_GZP.fix[treetabBLN2012$treenr [i]]
+    vug<- data.frame(NRcells = treex[[1]]$simulations$EWMZ)
+    treename<- treetabBLN2012$treecode [i]
+    colnames (vug) [1]<- treename
+    simulationsBLN2012<- cbind (simulationsBLN2012, vug)
+    rm(treex,vug)
+}
+
+
+##BL south 2013##
+##fitting Gompertz function##
+
+bl.mean <- aggregateRadialFiles(data=bls2013, stat="mean")
+bl.sdd <- standardiseCellCounts(bl.mean)
+bl.sdd_RCN <- computeRingCellNb(bl.sdd)[, c("Site", "Year", "Tree", "Species", "RCN.Median")]
+names(bl.sdd_RCN) <- c("Site", "Year", "Tree", "Species", "A")
+bl.sdd_GZP.fix <- fitGompertzModels(bl.sdd, parameters=bl.sdd_RCN, predictions=TRUE,
+plot.fitting=FALSE, plot.obs.vs.pre=FALSE)
+
+
+
+
+##storing critical dates of wood formation and simnulated Gompertz curves##
+
+
+treenames2012<- c("T1", "T2", "T3", "T4", "T5", "T6")
+treenames2013.2014<- c("T1", "T2", "T3", "T4", "T5", "T6","T7", "T8")
+
+##data.frames for data storage##
+treeparamBLS2013<- data.frame (Type = NA,a=NA,b=NA,k=NA,ti=NA,tf=NA,dt=NA,tx=NA,ra=NA,rx=NA,R2=NA,EF=NA,RMSD=NA, treecode = NA, year = NA, site = NA, treenr = NA)
+treetabBLS2013<- data.frame (Type = NA,a=NA,b=NA,k=NA,ti=NA,tf=NA,dt=NA,tx=NA,ra=NA,rx=NA,R2=NA,EF=NA,RMSD=NA, treecode = treenames2013.2014, year = 2013, site = "south", treenr = c(1:8))
+simulationsBLS2013<- data.frame (DY = c(1:365), NRcells=NA)
+
+
+
+
+
+##critical dates storage##
+
+for (i in c(1:nrow(treetabBLS2013))) {
+treex<- bl.sdd_GZP.fix[treetabBLS2013$treenr [i]]
+vun2<- treex[[1]]$coefficients
+vun2$site<- treetabBLS2013$site [i]
+vun2$year<- treetabBLS2013$year [i]
+vun2$treecode<- treetabBLS2013$treecode [i]
+vun2$treenr<- treetabBLS2013$treenr [i]
+treeparamBLS2013<- rbind (treeparamBLS2013, vun2)
+rm(treex,vun2)
+}
+
+
+##Gompertz fits predictions##
+
+
+for (i in c(1:nrow(treetabBLS2013))) {
+    treex<- bl.sdd_GZP.fix[treetabBLS2013$treenr [i]]
+    vug<- data.frame(NRcells = treex[[1]]$simulations$EWMZ)
+    treename<- treetabBLS2013$treecode [i]
+    colnames (vug) [1]<- treename
+    simulationsBLS2013<- cbind (simulationsBLS2013, vug)
+    rm(treex,vug)
+}
+
+##BL north 2013##
+##fitting Gompertz function##
+
+bl.mean <- aggregateRadialFiles(data=bln2013, stat="mean")
+bl.sdd <- standardiseCellCounts(bl.mean)
+bl.sdd_RCN <- computeRingCellNb(bl.sdd)[, c("Site", "Year", "Tree", "Species", "RCN.Median")]
+names(bl.sdd_RCN) <- c("Site", "Year", "Tree", "Species", "A")
+bl.sdd_GZP.fix <- fitGompertzModels(bl.sdd, parameters=bl.sdd_RCN, predictions=TRUE,
+plot.fitting=FALSE, plot.obs.vs.pre=FALSE)
+
+
+
+
+##storing critical dates of wood formation and simnulated Gompertz curves##
+
+
+treenames2012<- c("T1", "T2", "T3", "T4", "T5", "T6")
+treenames2013.2014<- c("T1", "T2", "T3", "T4", "T5", "T6","T7", "T8")
+
+##data.frames for data storage##
+treeparamBLN2013<- data.frame (Type = NA,a=NA,b=NA,k=NA,ti=NA,tf=NA,dt=NA,tx=NA,ra=NA,rx=NA,R2=NA,EF=NA,RMSD=NA, treecode = NA, year = NA, site = NA, treenr = NA)
+treetabBLN2013<- data.frame (Type = NA,a=NA,b=NA,k=NA,ti=NA,tf=NA,dt=NA,tx=NA,ra=NA,rx=NA,R2=NA,EF=NA,RMSD=NA, treecode = treenames2013.2014, year = 2013, site = "north", treenr = c(1:8))
+simulationsBLN2013<- data.frame (DY = c(1:365), NRcells=NA)
+
+
+
+
+
+##critical dates storage##
+
+for (i in c(1:nrow(treetabBLN2013))) {
+treex<- bl.sdd_GZP.fix[treetabBLN2013$treenr [i]]
+vun2<- treex[[1]]$coefficients
+vun2$site<- treetabBLN2013$site [i]
+vun2$year<- treetabBLN2013$year [i]
+vun2$treecode<- treetabBLN2013$treecode [i]
+vun2$treenr<- treetabBLN2013$treenr [i]
+treeparamBLN2013<- rbind (treeparamBLN2013, vun2)
+rm(treex,vun2)
+}
+
+
+##Gompertz fits predictions##
+
+
+for (i in c(1:nrow(treetabBLN2013))) {
+    treex<- bl.sdd_GZP.fix[treetabBLN2013$treenr [i]]
+    vug<- data.frame(NRcells = treex[[1]]$simulations$EWMZ)
+    treename<- treetabBLN2013$treecode [i]
+    colnames (vug) [1]<- treename
+    simulationsBLN2013<- cbind (simulationsBLN2013, vug)
+    rm(treex,vug)
+}
+
+##BL south 2014##
+##fitting Gompertz function##
+
+bl.mean <- aggregateRadialFiles(data=bls2014, stat="mean")
+bl.sdd <- standardiseCellCounts(bl.mean)
+bl.sdd_RCN <- computeRingCellNb(bl.sdd)[, c("Site", "Year", "Tree", "Species", "RCN.Median")]
+names(bl.sdd_RCN) <- c("Site", "Year", "Tree", "Species", "A")
+bl.sdd_GZP.fix <- fitGompertzModels(bl.sdd, parameters=bl.sdd_RCN, predictions=TRUE,
+plot.fitting=FALSE, plot.obs.vs.pre=FALSE)
+
+
+
+
+##storing critical dates of wood formation and simnulated Gompertz curves##
+
+
+treenames2012<- c("T1", "T2", "T3", "T4", "T5", "T6")
+treenames2013.2014<- c("T1", "T2", "T3", "T4", "T5", "T6","T7", "T8")
+
+##data.frames for data storage##
+treeparamBLS2014<- data.frame (Type = NA,a=NA,b=NA,k=NA,ti=NA,tf=NA,dt=NA,tx=NA,ra=NA,rx=NA,R2=NA,EF=NA,RMSD=NA, treecode = NA, year = NA, site = NA, treenr = NA)
+treetabBLS2014<- data.frame (Type = NA,a=NA,b=NA,k=NA,ti=NA,tf=NA,dt=NA,tx=NA,ra=NA,rx=NA,R2=NA,EF=NA,RMSD=NA, treecode = treenames2013.2014, year = 2014, site = "south", treenr = c(1:8))
+simulationsBLS2014<- data.frame (DY = c(1:365), NRcells=NA)
+
+
+
+
+
+##critical dates storage##
+
+for (i in c(1:nrow(treetabBLS2014))) {
+treex<- bl.sdd_GZP.fix[treetabBLS2014$treenr [i]]
+vun2<- treex[[1]]$coefficients
+vun2$site<- treetabBLS2014$site [i]
+vun2$year<- treetabBLS2014$year [i]
+vun2$treecode<- treetabBLS2014$treecode [i]
+vun2$treenr<- treetabBLS2014$treenr [i]
+treeparamBLS2014<- rbind (treeparamBLS2014, vun2)
+rm(treex,vun2)
+}
+
+
+##Gompertz fits predictions##
+
+
+for (i in c(1:nrow(treetabBLS2014))) {
+    treex<- bl.sdd_GZP.fix[treetabBLS2014$treenr [i]]
+    vug<- data.frame(NRcells = treex[[1]]$simulations$EWMZ)
+    treename<- treetabBLS2014$treecode [i]
+    colnames (vug) [1]<- treename
+    simulationsBLS2014<- cbind (simulationsBLS2014, vug)
+    rm(treex,vug)
+}
+
+##BL north 2014##
+##fitting Gompertz function##
+
+bl.mean <- aggregateRadialFiles(data=bln2014, stat="mean")
+bl.sdd <- standardiseCellCounts(bl.mean)
+bl.sdd_RCN <- computeRingCellNb(bl.sdd)[, c("Site", "Year", "Tree", "Species", "RCN.Median")]
+names(bl.sdd_RCN) <- c("Site", "Year", "Tree", "Species", "A")
+bl.sdd_GZP.fix <- fitGompertzModels(bl.sdd, parameters=bl.sdd_RCN, predictions=TRUE,
+plot.fitting=FALSE, plot.obs.vs.pre=FALSE)
+
+
+
+
+##storing critical dates of wood formation and simnulated Gompertz curves##
+
+
+treenames2012<- c("T1", "T2", "T3", "T4", "T5", "T6")
+treenames2013.2014<- c("T1", "T2", "T3", "T4", "T5", "T6","T7", "T8")
+
+##data.frames for data storage##
+treeparamBLN2014<- data.frame (Type = NA,a=NA,b=NA,k=NA,ti=NA,tf=NA,dt=NA,tx=NA,ra=NA,rx=NA,R2=NA,EF=NA,RMSD=NA, treecode = NA, year = NA, site = NA, treenr = NA)
+treetabBLN2014<- data.frame (Type = NA,a=NA,b=NA,k=NA,ti=NA,tf=NA,dt=NA,tx=NA,ra=NA,rx=NA,R2=NA,EF=NA,RMSD=NA, treecode = treenames2013.2014, year = 2014, site = "north", treenr = c(1:8))
+simulationsBLN2014<- data.frame (DY = c(1:365), NRcells=NA)
+
+
+
+
+
+##critical dates storage##
+
+for (i in c(1:nrow(treetabBLN2014))) {
+treex<- bl.sdd_GZP.fix[treetabBLN2014$treenr [i]]
+vun2<- treex[[1]]$coefficients
+vun2$site<- treetabBLN2014$site [i]
+vun2$year<- treetabBLN2014$year [i]
+vun2$treecode<- treetabBLN2014$treecode [i]
+vun2$treenr<- treetabBLN2014$treenr [i]
+treeparamBLN2014<- rbind (treeparamBLN2014, vun2)
+rm(treex,vun2)
+}
+
+
+##Gompertz fits predictions##
+
+
+for (i in c(1:nrow(treetabBLN2014))) {
+    treex<- bl.sdd_GZP.fix[treetabBLN2014$treenr [i]]
+    vug<- data.frame(NRcells = treex[[1]]$simulations$EWMZ)
+    treename<- treetabBLN2014$treecode [i]
+    colnames (vug) [1]<- treename
+    simulationsBLN2014<- cbind (simulationsBLN2014, vug)
+    rm(treex,vug)
+}
+
+
+ 
+
