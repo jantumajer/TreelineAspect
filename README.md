@@ -3,7 +3,7 @@
 ## Inputs
 Input data involve (i) `south-north-clim.xlsx` - site microclimatic data and soil data characteristics of sites from the [TreeDataClim database](https://www.treedataclim.cz/en). This file is also used to match sites with rwl files. Several rwl files are attached for testing. The remaining rwl files are available upon request through the TreeDataClim website. (ii) Input data also includes climatic surfaces used for extraction of climatic data for each site (precipitation – `sra_wgs_month.nc` , temperature – `t_wgs_month.nc`). For a detailed description see [Mašek et al. 2024](https://linkinghub.elsevier.com/retrieve/pii/S0048969723069024) in Science of the Total Environment.
 ## R scripts
-### Age structure adjustment
+#### Age structure adjustment
 This script was used to adjust the age structures of samples to create datasets 1990 and 2015. As inputs, the `treedataclim.csv` and rwl files are used.
 ### Climatic response calculation
 The script reads data from climatic surfaces (`t_wgs_month.nc`, `sra_wgs_month.nc`) for each site, builds tree-ring chronology, detrend SPEI time-series and calculates correlations between tree-ring chronology and SPEI for two periods before and after 1990. As inputs the treedataclim.csv, rwl files and climatic surfaces are used.
