@@ -1,7 +1,7 @@
 # Data and scripts associated with the manuscript “Radial growth of Picea abies is controlled by joint effects of temperature and nutrient availability at the lower part of treeline ecotone”
 
 ## Inputs
-Input data involve (i) `south-north-clim.xlsx` - site microclimatic data and soil data characteristics of sites from the [TreeDataClim database](www.treedataclim.cz/en). This file is also used to match sites with rwl files. Several rwl files are attached for testing. The remaining rwl files are available upon request through the TreeDataClim website. (ii) Input data also includes climatic surfaces used for extraction of climatic data for each site (precipitation – `sra_wgs_month.nc` , temperature – `t_wgs_month.nc`). For a detailed description see [Mašek et al. 2024](https://linkinghub.elsevier.com/retrieve/pii/S0048969723069024) in Science of the Total Environment.
+Input data involve (i) `south-north-clim.xlsx` - site microclimatic data and soil data characteristics of sites from the [TreeDataClim database](https://www.treedataclim.cz/en). This file is also used to match sites with rwl files. Several rwl files are attached for testing. The remaining rwl files are available upon request through the TreeDataClim website. (ii) Input data also includes climatic surfaces used for extraction of climatic data for each site (precipitation – `sra_wgs_month.nc` , temperature – `t_wgs_month.nc`). For a detailed description see [Mašek et al. 2024](https://linkinghub.elsevier.com/retrieve/pii/S0048969723069024) in Science of the Total Environment.
 ## R scripts
 ### Age structure adjustment
 This script was used to adjust the age structures of samples to create datasets 1990 and 2015. As inputs, the `treedataclim.csv` and rwl files are used.
